@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Travel Assistant</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #f3f4f6;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --white: #ffffff;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: #f9fafb;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-container {
+            max-width: 600px;
+            width: 90%;
+            height: 92vh;
+            margin: 20px auto;
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+
+        .header {
+            background: var(--primary-color);
+            color: var(--white);
+            padding: 16px 20px;
+            font-size: 18px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header .icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-box {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 85%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.4;
+            position: relative;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background-color: var(--primary-color);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background-color: var(--white);
+            color: var(--text-color);
+            border: 1px solid #e5e7eb;
+            border-bottom-left-radius: 4px;
+            max-width: 90%;
+            white-space: pre-line;
+        }
+
+        /* Flight Styling */
+        .flights-container {
+            width: 100%;
+        }
+
+        .flights-header {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--primary-color);
+        }
+
+        .flight-option {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .flight-option:hover {
+            background-color: #f8fafc;
+            border-color: var(--primary-color);
+            transform: translateX(4px);
+        }
+
+        .flight-airline {
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .flight-route {
+            color: var(--text-color);
+            margin-bottom: 4px;
+        }
+
+        .flight-time {
+            font-size: 0.9em;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .flight-price {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-top: 6px;
+        }
+
+        /* Itinerary Styling */
+        .itinerary-container {
+            width: 100%;
+            line-height: 1.6;
+        }
+
+        .itinerary-header {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 16px 0 8px 0;
+            font-size: 1.1em;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 4px;
+        }
+
+        .itinerary-item {
+            margin: 8px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .itinerary-item:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.6em;
+            width: 8px;
+            height: 8px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        .itinerary-subitem {
+            margin: 4px 0 4px 20px;
+            color: var(--text-light);
+            font-size: 0.95em;
+        }
+
+        .itinerary-para {
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .itinerary-tip {
+            background-color: #f0f9ff;
+            border-left: 3px solid var(--primary-color);
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+            background: var(--white);
+            border-radius: 18px;
+            width: fit-content;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 8px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #9ca3af;
+            border-radius: 50%;
+            animation: typing 1.4s infinite ease-in-out;
+        }
+
+        .typing-dot:nth-child(1) { animation-delay: 0s; }
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-4px); }
+        }
+
+        .input-area {
+            padding: 16px;
+            border-top: 1px solid #e5e7eb;
+            background: var(--white);
+            display: flex;
+            gap: 10px;
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 24px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            padding: 0 20px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .download-btn {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 8px 16px;
+            background: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 18px;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        .download-btn:hover {
+            background: #1d4ed8;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="header">
+            <div class="icon">✈️</div>
+            Travel Assistant
+        </div>
+        <div id="chat" class="chat-box">
+            <div class="message bot-message">
+                Hello! I'm your travel assistant. How can I help you plan your trip today?
+            </div>
+        </div>
+        <div class="input-area">
+            <input 
+                type="text" 
+                id="msg" 
+                placeholder="Type your message..." 
+                onkeypress="if(event.key === 'Enter') send()"
+            >
+            <button id="sendBtn" onclick="send()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat');
+        const messageInput = document.getElementById('msg');
+        const sendBtn = document.getElementById('sendBtn');
+        let isBotTyping = false;
+
+        // Auto-scroll to bottom of chat
+        function scrollToBottom() {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        // Format flight message
+        function formatFlights(flights) {
+            const container = document.createElement('div');
+            container.className = 'flights-container';
+            
+            const header = document.createElement('div');
+            header.className = 'flights-header';
+            header.textContent = 'Available Flights:';
+            container.appendChild(header);
+            
+            flights.forEach((flight, index) => {
+                const flightDiv = document.createElement('div');
+                flightDiv.className = 'flight-option';
+                flightDiv.innerHTML = `
+                    <div class="flight-airline">${index + 1}. ${flight.airline} ${flight.flight_number}</div>
+                    <div class="flight-route">
+                        <span class="flight-departure">${flight.departure_airport}</span> → 
+                        <span class="flight-arrival">${flight.arrival_airport}</span>
+                    </div>
+                    <div class="flight-time">
+                        ${new Date(flight.departure_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - 
+                        ${new Date(flight.arrival_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </div>
+                    <div class="flight-price">₹${parseFloat(flight.price).toLocaleString('en-IN')}</div>
+                `;
+                flightDiv.onclick = () => {
+                    // Auto-fill the input with the selected flight number
+                    messageInput.value = index + 1;
+                    send();
+                };
+                container.appendChild(flightDiv);
+            });
+            
+            return container;
+        }
+
+        // Format itinerary message
+        function formatItinerary(itineraryText) {
+            const container = document.createElement('div');
+            container.className = 'itinerary-container';
+            
+            // Split by lines and process each line
+            const lines = itineraryText.split('\n').filter(line => line.trim() !== '');
+            
+            lines.forEach(line => {
+                if (line.startsWith('**') && line.endsWith('**')) {
+                    // This is a header
+                    const header = document.createElement('div');
+                    header.className = 'itinerary-header';
+                    header.textContent = line.replace(/\*\*/g, '');
+                    container.appendChild(header);
+                } else if (line.trim().match(/^\d+\./)) {
+                    // This is a numbered list item
+                    const item = document.createElement('div');
+                    item.className = 'itinerary-item';
+                    item.innerHTML = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    container.appendChild(item);
+                } else if (line.trim().startsWith('*')) {
+                    // This is a bullet point
+                    const subitem = document.createElement('div');
+                    subitem.className = 'itinerary-subitem';
+                    subitem.innerHTML = '• ' + line.replace(/^\s*\*\s*/, '').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    container.appendChild(subitem);
+                } else if (line.trim() !== '') {
+                    // Regular paragraph
+                    const para = document.createElement('div');
+                    para.className = 'itinerary-para';
+                    para.innerHTML = line.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    container.appendChild(para);
+                }
+            });
+            
+            return container;
+        }
+
+        // Add message to chat
+        function addMessage(content, isUser = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            
+            // Check if content is an object (for structured data) or string (for regular messages)
+            if (typeof content === 'object' && content !== null) {
+                if (content.type === 'flights' && Array.isArray(content.data)) {
+                    messageDiv.appendChild(formatFlights(content.data));
+                } else if (content.type === 'itinerary' && typeof content.data === 'string') {
+                    messageDiv.appendChild(formatItinerary(content.data));
+                } else if (content.type === 'hotels' && Array.isArray(content.data)) {
+                    // Similar formatting can be added for hotels
+                    messageDiv.textContent = JSON.stringify(content.data, null, 2);
+                } else {
+                    messageDiv.textContent = JSON.stringify(content, null, 2);
+                }
+            } else {
+                // For regular text messages
+                messageDiv.textContent = content;
+            }
+            
+            chatBox.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Show typing indicator
+        function showTyping() {
+            if (isBotTyping) return;
+            
+            isBotTyping = true;
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typing';
+            typingDiv.innerHTML = `
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            `;
+            chatBox.appendChild(typingDiv);
+            scrollToBottom();
+        }
+
+        // Hide typing indicator
+        function hideTyping() {
+            const typing = document.getElementById('typing');
+            if (typing) {
+                typing.remove();
+            }
+            isBotTyping = false;
+        }
+
+        // Handle download link
+        function addDownloadLink(url) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.className = 'download-btn';
+            link.textContent = '⬇ Download Travel Itinerary';
+            link.target = '_blank';
+            chatBox.appendChild(link);
+            scrollToBottom();
+        }
+
+        // Send message to server
+        async function send() {
+            const message = messageInput.value.trim();
+            if (!message || isBotTyping) return;
+
+            // Add user message to chat
+            addMessage(message, true);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            showTyping();
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+
+                const data = await response.json();
+                hideTyping();
+                
+                // Add bot response with proper formatting
+                if (data.reply) {
+                    // Check if this is a flight list
+                    if (data.reply.startsWith('Available Flights:')) {
+                        // Extract flight data from TRIP_MEMORY if available
+                        if (data.flights && Array.isArray(data.flights)) {
+                            addMessage({
+                                type: 'flights',
+                                data: data.flights
+                            }, false);
+                        } else {
+                            addMessage(data.reply, false);
+                        }
+                    } 
+                    // Check if this is an itinerary
+                    else if (data.reply.includes('ITINERARY GENERATED')) {
+                        // Split the reply to separate the header from the itinerary content
+                        const parts = data.reply.split('✅ ITINERARY GENERATED');
+                        if (parts.length > 1) {
+                            addMessage('✅ ITINERARY GENERATED', false);
+                            addMessage({
+                                type: 'itinerary',
+                                data: parts[1].trim()
+                            }, false);
+                        } else {
+                            addMessage(data.reply, false);
+                        }
+                    } 
+                    // Regular message
+                    else {
+                        addMessage(data.reply, false);
+                    }
+                }
+                
+                // Add download link if available
+                if (data.download) {
+                    addDownloadLink(data.download);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                hideTyping();
+                addMessage('Sorry, something went wrong. Please try again.', false);
+            } finally {
+                sendBtn.disabled = false;
+                messageInput.focus();
+            }
+        }
+
+        // Handle Enter key press
+        messageInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                send();
+            }
+        });
+
+        // Initial focus on input
+        messageInput.focus();
+    </script>
+</body>
+</html>
